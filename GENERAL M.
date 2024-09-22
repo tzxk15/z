@@ -216,7 +216,7 @@ local function Shoot(firstPos, nextPos, Revolver)
 end
 
 
-local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/Tyeckk/script/main/UI", true))()
+local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/tzxk15/z/refs/heads/main/UI", true))()
 local Table = {}
 
 local window = Lib:CreateWindow("Chaos v7.6.5y")
