@@ -75,13 +75,13 @@
 
         glow.Name = "glow"
         glow.Parent = Main
-        glow.BackgroundColor3 = Color3.fromRGB(255, 0, 100)
-        glow.BackgroundTransparency = 900
+        glow.BackgroundColor3 = Color3.fromRGB(0, 0, 255)
+        glow.BackgroundTransparency = 905
         glow.BorderSizePixel = 1
         glow.Position = UDim2.new(0, -15, 0, -15)
-        glow.Size = UDim2.new(1, 32, 1, 32)
+        glow.Size = UDim2.new(1, 31, 1, 31)
         glow.Image = "rbxassetid://4996891970"
-        glow.ImageColor3 = Color3.fromRGB(255, 0, 100)
+        glow.ImageColor3 = Color3.fromRGB(0, 0, 255)
         glow.ScaleType = Enum.ScaleType.Slice
         glow.SliceCenter = Rect.new(20, 20, 280, 280)
 
@@ -147,13 +147,13 @@
 
         glow_2.Name = "glow"
         glow_2.Parent = Title
-        glow_2.BackgroundColor3 = Color3.fromRGB(255, 0, 100)
-        glow_2.BackgroundTransparency = 900
+        glow_2.BackgroundColor3 = Color3.fromRGB(0, 0, 255)
+        glow_2.BackgroundTransparency = 905
         glow_2.BorderSizePixel = 1
         glow_2.Position = UDim2.new(0, -15, 0, -15)
-        glow_2.Size = UDim2.new(1, 30, 1, 30)
+        glow_2.Size = UDim2.new(1, 31, 1, 32)
         glow_2.Image = "rbxassetid://4996891970"
-        glow_2.ImageColor3 = Color3.fromRGB(255, 0, 100)
+        glow_2.ImageColor3 = Color3.fromRGB(0, 0, 255)
         glow_2.ScaleType = Enum.ScaleType.Slice
         glow_2.SliceCenter = Rect.new(20, 20, 280, 280)
 
@@ -1129,13 +1129,13 @@ AddDrag(Title_2, Main)
             
             glow.Name = "glow"
             glow.Parent = Title_2
-            glow.BackgroundColor3 = Color3.fromRGB(255, 0, 100)
-            glow.BackgroundTransparency = 1.000
+            glow.BackgroundColor3 = Color3.fromRGB(0, 0, 255)
+            glow.BackgroundTransparency = 1.100
             glow.BorderSizePixel = 0
             glow.Position = UDim2.new(0, -15, 0, -15)
-            glow.Size = UDim2.new(1, 30, 1, 30)
+            glow.Size = UDim2.new(1, 29, 1, 29)
             glow.Image = "rbxassetid://4996891970"
-            glow.ImageColor3 = Color3.fromRGB(255, 0, 100)
+            glow.ImageColor3 = Color3.fromRGB(0, 0, 255)
             glow.ScaleType = Enum.ScaleType.Slice
             glow.SliceCenter = Rect.new(20, 20, 280, 280)
 
