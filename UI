@@ -62,32 +62,32 @@
         Main.Position = UDim2.new(0, 15, 0, 15)
         Main.Size = UDim2.new(0, 150, 0, 206)
         Main.Image = "rbxassetid://3570695787"
-        Main.ImageColor3 = Color3.fromRGB(1, 1, 1)
+        Main.ImageColor3 = Color3.fromRGB(3, 3, 3)
         Main.ScaleType = Enum.ScaleType.Slice
         Main.SliceCenter = Rect.new(100, 100, 100, 100)
         Main.SliceScale = 0.040
         Main.Name = "Main"
         Main.Parent = ScreenGui
-        Main.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        Main.BackgroundColor3 = Color3.fromRGB(3, 3, 3)
         Main.BorderSizePixel = 0
         Main.Position = UDim2.new(0, #ScreenGui:GetChildren() * 170 - 155, 0, 15)
         Main.Size = UDim2.new(0, 150, 0, 25)
 
         glow.Name = "glow"
         glow.Parent = Main
-        glow.BackgroundColor3 = Color3.fromRGB(0, 0, 255)
-        glow.BackgroundTransparency = 905
+        glow.BackgroundColor3 = Color3.fromRGB(255, 2, 2)
+        glow.BackgroundTransparency = 908
         glow.BorderSizePixel = 1
         glow.Position = UDim2.new(0, -15, 0, -15)
-        glow.Size = UDim2.new(1, 31, 1, 31)
+        glow.Size = UDim2.new(1, 30, 1, 30)
         glow.Image = "rbxassetid://4996891970"
-        glow.ImageColor3 = Color3.fromRGB(0, 0, 255)
+        glow.ImageColor3 = Color3.fromRGB(255, 2, 2)
         glow.ScaleType = Enum.ScaleType.Slice
         glow.SliceCenter = Rect.new(20, 20, 280, 280)
 
         buttonHolder.Name = "buttonHolder"
         buttonHolder.Parent = Main
-        buttonHolder.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+        buttonHolder.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
         buttonHolder.BackgroundTransparency = 1.000
         buttonHolder.BorderSizePixel = 0
         buttonHolder.Position = UDim2.new(0, 0, 0, 25)
@@ -107,7 +107,7 @@
         
         Title.Name = "Title"
         Title.Parent = Main
-        Title.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+        Title.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
         Title.BackgroundTransparency = 1.000
         Title.BorderSizePixel = 0
         Title.Size = UDim2.new(1, 0, 0, 25)
@@ -120,9 +120,9 @@
         Title_2.Position = UDim2.new(0, 5, 0, 0)
         Title_2.Size = UDim2.new(1, -5, 1, 0)
         Title_2.ZIndex = 2
-        Title_2.Font = Enum.Font.Arial--aa
+        Title_2.Font = Enum.Font.Roboto --aaxd
         Title_2.Text = Name
-        Title_2.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Title_2.TextColor3 = Color3.fromRGB(240, 240, 240)
         Title_2.TextSize = 15.000
         Title_2.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
         Title_2.TextStrokeTransparency = 0.920
@@ -136,24 +136,24 @@
         Minimize.BackgroundTransparency = 1.000
         Minimize.Position = UDim2.new(1, 0, 0.5, 0)
         Minimize.Selectable = false
-        Minimize.Size = UDim2.new(0, 25, 0, 25)
+        Minimize.Size = UDim2.new(0, 30, 0, 30)
         Minimize.ZIndex = 2
-        Minimize.Font = Enum.Font.Arial
+        Minimize.Font = Enum.Font.Roboto
         Minimize.Text = "-"
         Minimize.TextColor3 = Color3.fromRGB(255, 255, 255)
         Minimize.TextSize = 12.000
         Minimize.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
-        Minimize.TextStrokeTransparency = 0.920
+        Minimize.TextStrokeTransparency = 0.930
 
         glow_2.Name = "glow"
         glow_2.Parent = Title
-        glow_2.BackgroundColor3 = Color3.fromRGB(0, 0, 255)
-        glow_2.BackgroundTransparency = 905
+        glow_2.BackgroundColor3 = Color3.fromRGB(255, 2, 2)
+        glow_2.BackgroundTransparency = 908
         glow_2.BorderSizePixel = 1
         glow_2.Position = UDim2.new(0, -15, 0, -15)
-        glow_2.Size = UDim2.new(1, 31, 1, 32)
+        glow_2.Size = UDim2.new(1, 30, 1, 30)
         glow_2.Image = "rbxassetid://4996891970"
-        glow_2.ImageColor3 = Color3.fromRGB(0, 0, 255)
+        glow_2.ImageColor3 = Color3.fromRGB(255, 2, 2)
         glow_2.ScaleType = Enum.ScaleType.Slice
         glow_2.SliceCenter = Rect.new(20, 20, 280, 280)
 
@@ -1096,14 +1096,14 @@ AddDrag(Title_2, Main)
             
             Title_2.Name = "Title"
             Title_2.Parent = Title
-            Title_2.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+            Title_2.BackgroundColor3 = Color3.fromRGB(3, 3, 3)
             Title_2.BackgroundTransparency = 0
             Title_2.Position = UDim2.new(0, -5, 0, 0)
             Title_2.Size = UDim2.new(1, 5, 1, 0)
             Title_2.ZIndex = 2
-            Title_2.Font = Enum.Font.Arial
+            Title_2.Font = Enum.Font.Roboto
             Title_2.Text = " "..text
-            Title_2.TextColor3 = Color3.fromRGB(255, 255, 255)
+            Title_2.TextColor3 = Color3.fromRGB(240, 255, 255)
             Title_2.TextSize = 13.000
             Title_2.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)
             Title_2.TextStrokeTransparency = 0.920
@@ -1118,9 +1118,9 @@ AddDrag(Title_2, Main)
             minimize.BackgroundTransparency = 1.000
             minimize.Position = UDim2.new(1, 0, 0.5, 0)
             minimize.Selectable = false
-            minimize.Size = UDim2.new(0, 25, 0, 25)
+            minimize.Size = UDim2.new(0, 30, 0, 30)
             minimize.ZIndex = 3
-            minimize.Font = Enum.Font.Gotham
+            minimize.Font = Enum.Font.Roboto
             minimize.Text = "-"
             minimize.TextColor3 = Color3.fromRGB(255, 255, 255)
             minimize.TextSize = 12.000
@@ -1129,13 +1129,13 @@ AddDrag(Title_2, Main)
             
             glow.Name = "glow"
             glow.Parent = Title_2
-            glow.BackgroundColor3 = Color3.fromRGB(0, 0, 255)
+            glow.BackgroundColor3 = Color3.fromRGB(255, 2, 2)
             glow.BackgroundTransparency = 1.100
             glow.BorderSizePixel = 0
             glow.Position = UDim2.new(0, -15, 0, -15)
             glow.Size = UDim2.new(1, 29, 1, 29)
             glow.Image = "rbxassetid://4996891970"
-            glow.ImageColor3 = Color3.fromRGB(0, 0, 255)
+            glow.ImageColor3 = Color3.fromRGB(255, 2, 2)
             glow.ScaleType = Enum.ScaleType.Slice
             glow.SliceCenter = Rect.new(20, 20, 280, 280)
 
