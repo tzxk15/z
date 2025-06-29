@@ -460,26 +460,3 @@ wait(0.1)
         end
     end
 end)
-
-wait() 
-
-local Mouse = game.Players.LocalPlayer:GetMouse()
-local UserInputService = game:GetService("UserInputService")
-local Players = game:GetService("Players")
-local plr = Players.LocalPlayer
-local mouse = plr:GetMouse()
-
-local function unequipTools(character)
-    for _, tool in pairs(character:GetChildren()) do
-        if tool:IsA("Tool") and tool.Name ~= "C4" and tool.Name ~= "Grenade" then
-            tool.Parent = plr.Backpack
-        end
-    end
-end
-
-local function forceJump(humanoid)
-    humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-    task.wait(0.1) -- PequeÃ±a espera para que suba
-end
-
-local function teleportTool(toolName, model
