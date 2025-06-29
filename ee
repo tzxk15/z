@@ -460,3 +460,46 @@ wait(0.1)
         end
     end
 end)
+
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
+local isActive = false
+
+local function onCharacterAdded()
+    if isActive then
+        task.wait(0.4) -- Esperar 0.3 segundos antes de ejecutar la funciÃ³n
+        local PlayerGui = Player:FindFirstChild("PlayerGui")
+        if PlayerGui then
+            local MenuScreen = PlayerGui:FindFirstChild("Menu Screen")
+            if MenuScreen then
+                MenuScreen.Enabled = false
+                MenuScreen.RemoteEvent:FireServer("Emerald Greatsword")
+            end
+        end
+    end
+end
+
+-- Detectar cuando el personaje reaparece
+Player.CharacterAdded:Connect(onCharacterAdded)
+
+UserInputService.InputBegan:Connect(function(Input, IsTyping)
+    if IsTyping then return end
+    if Input.KeyCode == Enum.KeyCode.KeypadSeven then
+        isActive = not isActive  -- Alternar estado (activado/desactivado)
+        
+        if isActive then
+            onCharacterAdded()  -- Ejecutar si el personaje ya estÃ¡ activo
+        end
+    end
+end)
+
+local Mouse = game.Players.LocalPlayer:GetMouse()
+game:GetService("UserInputService").InputBegan:Connect(function(Input, IsTyping)
+if IsTyping then return end
+if Input.KeyCode == Enum.KeyCode.F1 then
+local player = game.Players.LocalPlayer  -- Obtener el jugador local
+local humanoid = game.Workspace[player.Name].Humanoid  -- Obtener el Humanoid del jugador local
+humanoid.Health = 0 
+end
+end)
