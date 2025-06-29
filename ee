@@ -1,0 +1,485 @@
+local UserInputService = game:GetService("UserInputService")
+local Heartbeat = game:GetService("RunService").Heartbeat
+local walkSpeed = 15
+local plrs = game:GetService'Players'
+local Heartbeat = game:GetService("RunService").Heartbeat
+local plr = plrs.LocalPlayer
+local mouse = plr:GetMouse()
+local rep = game:GetService'ReplicatedStorage'
+local uis = game:GetService'UserInputService'
+local ts = game:GetService'TweenService'
+local rs = game:GetService'RunService'
+
+local Player = game:GetService("Players").LocalPlayer
+local Mouse = Player:GetMouse()
+
+local function Notify(title,text,duration)
+    game:GetService'StarterGui':SetCore('SendNotification',{
+        Title = tostring(title),
+        Text = tostring(text),
+        Duration = tonumber(duration),
+    })
+end
+
+local function GetChar()
+    local Char = Player.Character or Player.CharacterAdded:Wait()
+    return Char
+end
+
+spawn(function()
+    while true do rs.RenderStepped:wait()
+        pcall(function()
+            if not uis:IsKeyDown(Enum.KeyCode.LeftShift) then
+                plr.Character.Humanoid.WalkSpeed = walkSpeed
+            elseif uis:IsKeyDown(Enum.KeyCode.LeftShift) then
+                plr.Character.Humanoid.WalkSpeed = walkSpeed+18
+            end
+        end)
+    end
+end)
+
+spawn(function()
+    while true do rs.RenderStepped:wait()
+        pcall(function()
+            if not uis:IsKeyDown(Enum.KeyCode.E) then
+                plr.Character.Humanoid.WalkSpeed = walkSpeed
+            elseif uis:IsKeyDown(Enum.KeyCode.E) then
+                plr.Character.Humanoid.WalkSpeed = walkSpeed+2
+            end
+        end)
+    end
+end)
+
+local function AddCd(tool, Cd)
+    local cd = Instance.new('IntValue', tool)
+    cd.Name = 'ClientCD'
+    game.Debris:AddItem(cd, Cd)
+end
+
+local function Shoot(firstPos, nextPos, Revolver)
+    if Revolver:FindFirstChild('Barrel') and Revolver.Barrel:FindFirstChild('Attachment') then
+        if Revolver.Barrel.Attachment:FindFirstChild('Sound') then
+            local SoundClone = Revolver.Barrel.Attachment.Sound:Clone()
+            SoundClone.Name = 'Uncopy'
+            SoundClone.Parent = Revolver.Barrel.Attachment
+            SoundClone:Play()
+            game.Debris:AddItem(SoundClone, 1)
+        end
+
+        -- Crear tabla de objetos a ignorar en el raycast
+        local FilterTable = {plr.Character, game.Workspace['Target Filter']}
+        for _, v in pairs(game.Workspace:GetDescendants()) do
+            if v:IsA('Accessory') then
+                table.insert(FilterTable, v)
+            end
+        end
+
+        local direction = (nextPos - firstPos).Unit * 100
+        local ray = Ray.new(firstPos, direction)
+        local hitPart, hitPosition = game.Workspace:FindPartOnRayWithIgnoreList(ray, FilterTable)
+
+        -- Clonar y sincronizar la bala
+        local BulletCl = rep['Revolver Bullet']:Clone()
+        BulletCl.Parent = game.Workspace['Target Filter']
+        game.Debris:AddItem(BulletCl, 1)
+
+        if hitPart then
+            -- Calcular la distancia e impactar la bala
+            local distance = (firstPos - hitPosition).Magnitude
+            BulletCl.Size = Vector3.new(0.2, 0.2, distance)
+            BulletCl.CFrame = CFrame.new(firstPos, hitPosition) * CFrame.new(0, 0, -distance / 2)
+
+            -- AnimaciÃ³n de bala
+            ts:Create(BulletCl, TweenInfo.new(0.4, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {
+                Size = Vector3.new(0.06, 0.06, distance),
+                Transparency = 1
+            }):Play()
+
+            -- Crear el efecto de impacto
+            local expPart = Instance.new('Part')
+            expPart.Anchored = true
+            expPart.CanCollide = false
+            expPart.Shape = 'Ball'
+            expPart.Material = Enum.Material.Neon
+            expPart.BrickColor = BulletCl.BrickColor
+            expPart.Size = Vector3.new(0.1, 0.1, 0.1)
+            expPart.Parent = game.Workspace['Target Filter']
+            expPart.Position = hitPosition
+            game.Debris:AddItem(expPart, 2)
+
+            -- AnimaciÃ³n de expansiÃ³n del impacto
+            ts:Create(expPart, TweenInfo.new(0.3, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {
+                Size = Vector3.new(2, 2, 2),
+                Transparency = 1
+            }):Play()
+
+            -- Enviar daÃ±o al servidor si es un humanoide
+            if Revolver:FindFirstChild('DamageRemote') and hitPart.Parent:FindFirstChild('Humanoid') then
+                Revolver.DamageRemote:FireServer(hitPart.Parent.Humanoid, hitPosition)
+            end
+        else
+            -- En caso de que no haya impacto (bala sin colisiÃ³n)
+            local distance = (firstPos - (firstPos + direction)).Magnitude
+            BulletCl.Size = Vector3.new(0.2, 0.2, distance)
+            BulletCl.CFrame = CFrame.new(firstPos, firstPos + direction) * CFrame.new(0, 0, -distance / -2)
+
+            -- AnimaciÃ³n de bala
+            ts:Create(BulletCl, TweenInfo.new(0.4, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {
+                Size = Vector3.new(0.06, 0.06, distance),
+                Transparency = 1
+            }):Play()
+        end
+    end
+end
+--Hitlock
+local plr = game.Players.LocalPlayer
+local rs = game:GetService("RunService")
+local mouse = plr:GetMouse()
+
+-- Function to add glow to SelectionBox
+local function AddGlow(selectionBox)
+    local glow = Instance.new("PointLight")
+    glow.Name = "SelectionGlow"
+    glow.Color = Color3.fromRGB(200,36,64)
+    glow.Brightness = 0
+    glow.Range = 0
+    glow.Parent = selectionBox
+end
+
+-- Function to create a neon part and update its position
+local function CreateNeonPart(adornedPart, player)
+    -- Elimina cualquier "SelectedPlayerGui" existente
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v.Name == "SelectedPlayerGui" and v:IsA("BillboardGui") then
+            v:Destroy()
+        end
+    end
+
+    local billboardGui = Instance.new("BillboardGui")
+    billboardGui.Name = "SelectedPlayerGui"
+    billboardGui.AlwaysOnTop = true
+    billboardGui.Size = UDim2.new(1, 0, 1, 0)  -- Ajusta el tamaÃ±o segÃºn sea necesario
+    billboardGui.Adornee = adornedPart
+    billboardGui.Parent = adornedPart
+
+    local frame = Instance.new("Frame")
+    frame.BackgroundTransparency = 1
+    frame.Size = UDim2.new(0.9, 0, 0.9, 0)
+    frame.BackgroundColor3 = Color3.fromRGB(120,255,64)
+    frame.Parent = billboardGui
+
+    local neonPart = Instance.new("Part")
+    neonPart.Name = "SelectedPlayer"
+    neonPart.Anchored = true
+    neonPart.CanCollide = false
+    neonPart.Transparency = 1
+    neonPart.Size = Vector3.new(0.5, 0.5, 0.5)
+    neonPart.Position = adornedPart.Position
+    neonPart.CFrame = adornedPart.CFrame
+    neonPart.Material = Enum.Material.Neon
+    neonPart.Color = Color3.fromRGB(120,255,64)
+    AddGlow(neonPart)  -- AÃ±adir brillo a la parte de neÃ³n
+    neonPart.Parent = adornedPart
+    
+    -- Update neon part position continuously
+    local function updatePosition()
+        if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            neonPart.Position = player.Character.HumanoidRootPart.Position
+        else
+            neonPart:Destroy()
+        end
+    end
+    
+    updatePosition() -- Call initially to set correct position
+    
+    -- Connect to heartbeat to update position continuously
+    local heartbeatConnection
+    heartbeatConnection = rs.Heartbeat:Connect(function()
+        if not player or not player.Parent or not player.Character or not player.Character:FindFirstChild("Head") then
+            neonPart:Destroy()
+            heartbeatConnection:Disconnect()
+        else
+            updatePosition()
+        end
+    end)
+end
+
+-- Function to get the local player's name
+local function GetLocalPlayerName()
+    return plr.Name
+end
+
+-- Function to handle player selection
+local function SelectPlayer(player)
+    -- Avoid selecting the local player
+    if player == plr then return end
+
+    for _, v in next, workspace:GetDescendants() do
+        if v.Name == "SelectedPlayer" or v.Name == "SelectedPlayerGui" then
+            v:Destroy()
+        end
+    end
+
+    if player then
+        CreateNeonPart(player.Character.Head, player)
+        tar = player
+    end
+end
+
+local function isWithinDistance(player, target, maxDistance)
+    if player and player.Character and target and target.Character then
+        local playerPosition = player.Character:FindFirstChild("HumanoidRootPart").Position
+        local targetPosition = target.Character:FindFirstChild("HumanoidRootPart").Position
+        local distance = (playerPosition - targetPosition).Magnitude
+        return distance <= maxDistance
+    end
+    return false
+end
+
+-- Main key down event handler
+mouse.KeyDown:Connect(function(key)
+    if key == 'r' then
+        tar = nil
+        local n_plr, dist
+        for _, v in pairs(game.Players:GetPlayers()) do
+            if v ~= plr and plr.Character and plr.Character:FindFirstChild'HumanoidRootPart' then
+                local distance = v:DistanceFromCharacter(plr.Character.HumanoidRootPart.Position)
+                if v.Character and (not dist or distance <= dist) and v.Character:FindFirstChildOfClass'Humanoid' and v.Character:FindFirstChildOfClass'Humanoid'.Health > 0 and v.Character:FindFirstChild'HumanoidRootPart' then
+                    dist = distance
+                    n_plr = v
+                end
+            end
+        end
+        if n_plr then
+            SelectPlayer(n_plr)
+        end
+    elseif key == 'q' and tar and plr.Character then
+        for _,v in next, plr.Character:GetDescendants() do
+            if v:IsA'Tool' and v.Name ~= 'Kawaii Revolver' and not v:FindFirstChild'ClientCD' and v:FindFirstChild'DamageRemote' and v:FindFirstChild'Cooldown' and tar and tar.Character and tar.Character:FindFirstChildOfClass'Humanoid' then
+                AddCd(v, v.Cooldown.Value)
+
+                if v:FindFirstChild'Attack' and plr.Character:FindFirstChildOfClass'Humanoid' then
+                    plr.Character:FindFirstChildOfClass'Humanoid':LoadAnimation(v.Attack):Play()
+                end
+
+                if v:FindFirstChild('Blade') then
+                    local swingSound = v.Blade:FindFirstChild('SwingSound')
+                    local hitSound = v.Blade:FindFirstChild('HitSound')
+
+                    -- Reproducir el sonido de swing siempre
+                    if swingSound and swingSound:IsA('Sound') then
+                        swingSound:Play()
+                    end
+
+                    -- Intentar infligir daÃ±o usando DamageRemote
+                    local humanoidTarget = tar.Character:FindFirstChildOfClass('Humanoid')
+                    if humanoidTarget then
+                        -- Esperar 0.2 segundos para simular el golpe
+                        wait(0.2)
+
+                        -- Enviar el evento de daÃ±o al servidor
+                        v.DamageRemote:FireServer(humanoidTarget)
+
+                        -- Reproducir HitSound solo si estamos a 20 studs o menos del jugador seleccionado
+                        if hitSound and hitSound:IsA('Sound') and isWithinDistance(plr, tar, 20) then
+                            hitSound:Play()  -- Solo se reproduce si el servidor confirma el daÃ±o y estamos a menos de 20 studs
+            elseif v:IsA'Tool' and v.Name == 'Throwing Knife' and not v:FindFirstChild'ClientCD' and v:FindFirstChild'RemoteEvent' and tar and tar.Character and tar.Character:FindFirstChild'Head' then
+                -- Lanza el cuchillo hacia el jugador seleccionado usando el RemoteEvent
+                v.RemoteEvent:FireServer(tar.Character.HumanoidRootPart.Position)     
+                       end
+                    end
+                end
+            elseif v:IsA'Tool' and v.Name == 'Kawaii Revolver' and not v:FindFirstChild'ClientCD' and v:FindFirstChild'ReplicateRemote' and v:FindFirstChild'Barrel' and v.Barrel:FindFirstChild'Attachment' and tar and tar.Character and tar.Character:FindFirstChild'Head' then
+                v.Parent = plr.Character
+                AddCd(v,1.0)
+                rs.Stepped:Wait()
+                plr.Character:FindFirstChildOfClass'Humanoid':LoadAnimation(v.Fire):Play()
+
+                -- Disparar el revolver, apuntando al torso del objetivo
+                Shoot(v.Barrel.Attachment.WorldPosition, tar.Character:WaitForChild("Torso").Position, v)
+                v.ReplicateRemote:FireServer(tar.Character:WaitForChild("HumanoidRootPart").Position)
+
+                -- Reproducir HitSound solo si estamos a 20 studs o menos del jugador seleccionado
+                local hitSound = v:FindFirstChild('HitSound')
+                if hitSound and hitSound:IsA('Sound') and isWithinDistance(plr, tar, 20) then
+                    hitSound:Play()  -- Reproduce el sonido de impacto si estamos a 20 studs o menos
+            elseif v:IsA'Tool' and v.Name == 'Throwing Knife' and not v:FindFirstChild'ClientCD' and v:FindFirstChild'RemoteEvent' and tar and tar.Character and tar.Character:FindFirstChild'Head' then
+                -- Lanza el cuchillo hacia el jugador seleccionado usando el RemoteEvent
+                v.RemoteEvent:FireServer(tar.Character.HumanoidRootPart.Position)     
+                end
+            end
+        end
+    end
+end)
+
+-- Mouse click event handler to select player
+mouse.Button1Down:Connect(function()
+    local target = mouse.Target
+    if target and target.Parent then
+        local player = game.Players:GetPlayerFromCharacter(target.Parent)
+        if player and player ~= plr then
+            SelectPlayer(player)
+        end
+    end
+end)
+
+plr:GetMouse().KeyDown:Connect(function(key)
+    if key == 'z' and tar and plr.Character then 
+        for _,v in next,plr.Character:GetDescendants() do
+            if v:IsA'Tool' and not v:FindFirstChild'ClientCD' and v:FindFirstChild'DamageRemote' and v:FindFirstChild'Cooldown' and tar and tar.Character and tar.Character:FindFirstChildOfClass'Humanoid' then
+                AddCd(v,v.Cooldown.Value)
+                local player = game.Players.LocalPlayer 
+                Workspace[player.Name]:FindFirstChild(v.Name).Blade.HitSound:Play()
+                rs.Stepped:Wait() --LOLLLL Fixed.
+                v.DamageRemote:FireServer(tar.Character:FindFirstChildOfClass'Humanoid')          
+            end
+        end
+    end
+end)
+--Triple Jump B
+local Mouse = game.Players.LocalPlayer:GetMouse()
+game:GetService("UserInputService").InputBegan:Connect(function(Input, IsTyping)
+    if IsTyping then return end
+    if Input.KeyCode == Enum.KeyCode.C then
+        wait()
+        local character = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
+
+        -- AsegÃºrate de que el personaje tiene un 'HumanoidRootPart'
+        local rootPart = character:FindFirstChild("HumanoidRootPart")
+        if rootPart then
+            local positionBelowFeet = rootPart.Position - Vector3.new(0, rootPart.Size.Y / 2.5, 0)
+            local Players = game:GetService("Players")
+            local UserInputService = game:GetService("UserInputService")
+            local LocalPlayer = Players.LocalPlayer
+
+            local plrs = game:GetService("Players")
+            local plr = plrs.LocalPlayer
+            local mouse = plr:GetMouse()
+
+            local hasDoubleJumped = false
+
+            local function unequipTools()
+                local char = plr.Character
+                if char then
+                    for _, tool in pairs(char:GetChildren()) do
+                        if tool:IsA("Tool") and tool.Name ~= "C4" and tool.Name ~= "Grenade" then
+                            tool.Parent = plr.Backpack -- Devuelve la herramienta al inventario
+                        end
+                    end
+                end
+            end
+
+            local function performDoubleJump()
+                local character = LocalPlayer.Character
+                local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+
+                if humanoid and not hasDoubleJumped then
+                    humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                    wait()
+
+                    -- Desequipar herramientas no permitidas
+                    unequipTools()
+
+local function teleportGrenade(modelName, position)
+    local model = game:GetService("Workspace"):FindFirstChild(modelName)
+    if model and model:IsA("Model") then
+        for _, child in ipairs(model:GetChildren()) do
+            if child:IsA("BasePart") then
+                child.Position = position
+            end
+        end
+    end
+end
+
+for _, v in next, plr.Backpack:GetChildren() do
+    if v.Name == "Grenade" and v:FindFirstChild("RemoteEvent") then
+        v.Parent = plr.Character
+        
+        wait(0.2)
+        humanoid:ChangeState(Enum.HumanoidStateType.Freefall)
+        
+        wait(0.1)
+        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        
+        -- Obtener la posiciÃ³n del personaje y calcular el punto debajo de sus pies
+        local rootPart = plr.Character:FindFirstChild("HumanoidRootPart")
+        if rootPart then
+            local grenadePosition = rootPart.Position - Vector3.new(0.1, 3.7, 0.1) -- Teletransporta la granada 3 unidades debajo
+            teleportGrenade("Grenade Model", grenadePosition)
+        end
+        
+        v:Activate()
+        v.Parent = plr.Backpack
+    end
+end
+wait(0.1)
+ for _, v in next, plr.Backpack:GetChildren() do
+                        if v.Name == "C4" and v:FindFirstChild("RemoteEvent") then
+                            v.Parent = plr.Character
+                            wait(0.2)
+
+                            local character = plr.Character
+                            if character and character:FindFirstChild("HumanoidRootPart") then
+                                local rootPart = character.HumanoidRootPart
+                                local c4Position = rootPart.Position - Vector3.new(0.1, 3.5, 0.1)
+
+                                local function teleportC4(tool)
+                                    if tool:IsA("Model") then
+                                        for _, child in ipairs(tool:GetChildren()) do
+                                            if child:IsA("BasePart") then
+                                                child.Position = c4Position
+                                            end
+                                        end
+                                    end
+                                end
+                                v.RemoteEvent:FireServer(mouse.Hit.LookVector)
+                                teleportC4(v)
+								humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                            end
+
+                            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                            wait()
+
+                            humanoid:ChangeState(Enum.HumanoidStateType.Freefall)
+                            wait(0.1)
+
+                            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+							wait()
+
+                            humanoid:ChangeState(Enum.HumanoidStateType.Freefall)                         
+                            
+							wait(0.1)
+						    v.Parent = plr.Backpack
+                        end
+                    end
+
+                    hasDoubleJumped = true
+                end
+            end
+            performDoubleJump()
+        end
+    end
+end)
+
+wait() 
+
+local Mouse = game.Players.LocalPlayer:GetMouse()
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local plr = Players.LocalPlayer
+local mouse = plr:GetMouse()
+
+local function unequipTools(character)
+    for _, tool in pairs(character:GetChildren()) do
+        if tool:IsA("Tool") and tool.Name ~= "C4" and tool.Name ~= "Grenade" then
+            tool.Parent = plr.Backpack
+        end
+    end
+end
+
+local function forceJump(humanoid)
+    humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    task.wait(0.1) -- PequeÃ±a espera para que suba
+end
+
+local function teleportTool(toolName, model
