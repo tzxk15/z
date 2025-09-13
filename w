@@ -6,7 +6,7 @@ end
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 ScreenGui.Name = "LibHorizontal"
 
--- toggle de visible con F6
+-- toggle con F6
 local Usp = game:GetService("UserInputService")
 local visible = true
 local Usable = true
@@ -40,40 +40,47 @@ function Lib:CreatePanel(Name)
     local Panel = {}
     Panel.flags = {}
 
-    -- Main window (robusta, más grande)
-    local Main = Instance.new("Frame")
-    Main.Name = "Main"
+    -- Main container robusto
+    local Main = Instance.new("ImageLabel")
     Main.Parent = ScreenGui
-    Main.BackgroundColor3 = Color3.fromRGB(25,25,25)
-    Main.BorderSizePixel = 0
-    Main.Position = UDim2.new(0, 50, 0, 50)
-    Main.Size = UDim2.new(0, 700, 0, 250)
+    Main.Name = "Main"
+    Main.Position = UDim2.new(0, 100, 0, 100)
+    Main.Size = UDim2.new(0, 800, 0, 400)
+    Main.BackgroundTransparency = 1
+    Main.Image = "rbxassetid://3570695787"
+    Main.ImageColor3 = Color3.fromRGB(10,10,10)
+    Main.ScaleType = Enum.ScaleType.Slice
+    Main.SliceCenter = Rect.new(100,100,100,100)
+    Main.SliceScale = 0.04
 
-    local Corner = Instance.new("UICorner", Main)
-    Corner.CornerRadius = UDim.new(0, 8)
+    -- Glow
+    local Glow = Instance.new("ImageLabel", Main)
+    Glow.BackgroundTransparency = 1
+    Glow.Size = UDim2.new(1,40,1,40)
+    Glow.Position = UDim2.new(0,-20,0,-20)
+    Glow.Image = "rbxassetid://4996891970"
+    Glow.ImageColor3 = Color3.fromRGB(255,0,0)
+    Glow.ScaleType = Enum.ScaleType.Slice
+    Glow.SliceCenter = Rect.new(20,20,280,280)
 
-    -- Barra de título
+    -- Title bar
     local TitleBar = Instance.new("Frame", Main)
-    TitleBar.BackgroundColor3 = Color3.fromRGB(15,15,15)
-    TitleBar.Size = UDim2.new(1,0,0,25)
+    TitleBar.Size = UDim2.new(1,0,0,30)
+    TitleBar.BackgroundColor3 = Color3.fromRGB(20,20,20)
+    TitleBar.BorderSizePixel = 0
 
     local Title = Instance.new("TextLabel", TitleBar)
-    Title.Text = Name
     Title.Size = UDim2.new(1,0,1,0)
     Title.BackgroundTransparency = 1
-    Title.TextColor3 = Color3.new(1,1,1)
+    Title.Text = Name
     Title.Font = Enum.Font.Roboto
-    Title.TextSize = 14
+    Title.TextSize = 15
+    Title.TextColor3 = Color3.new(1,1,1)
 
     -- Drag system
-    local dragging, dragInput, dragStart, startPos
-    local function update(input)
-        local delta = input.Position - dragStart
-        Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
-                                  startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
+    local dragging, dragStart, startPos
     TitleBar.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = true
             dragStart = input.Position
             startPos = Main.Position
@@ -85,15 +92,17 @@ function Lib:CreatePanel(Name)
         end
     end)
     TitleBar.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
-            update(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - dragStart
+            Main.Position = UDim2.new(startPos.X.Scale,startPos.X.Offset+delta.X,
+                                      startPos.Y.Scale,startPos.Y.Offset+delta.Y)
         end
     end)
 
-    -- Contenedor con scroll horizontal
+    -- Zona de “ventanas internas” (scroll horizontal si no caben)
     local Scrolling = Instance.new("ScrollingFrame", Main)
-    Scrolling.Position = UDim2.new(0,0,0,25)
-    Scrolling.Size = UDim2.new(1,0,1,-25)
+    Scrolling.Position = UDim2.new(0,0,0,30)
+    Scrolling.Size = UDim2.new(1,0,1,-30)
     Scrolling.BackgroundTransparency = 1
     Scrolling.ScrollBarThickness = 8
     Scrolling.ScrollingDirection = Enum.ScrollingDirection.X
@@ -101,35 +110,44 @@ function Lib:CreatePanel(Name)
 
     local Layout = Instance.new("UIListLayout", Scrolling)
     Layout.FillDirection = Enum.FillDirection.Horizontal
-    Layout.SortOrder = Enum.SortOrder.LayoutOrder
-    Layout.Padding = UDim.new(0,10)
-
+    Layout.Padding = UDim.new(0,15)
     Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        Scrolling.CanvasSize = UDim2.new(0, Layout.AbsoluteContentSize.X+10,0,0)
+        Scrolling.CanvasSize = UDim2.new(0, Layout.AbsoluteContentSize.X+20,0,0)
     end)
 
-    --------------------------------------------------------------------
-    -- Aquí reusamos las funciones de tu UI original pero adaptadas
-    -- para meter cada elemento dentro de Scrolling horizontal
-    --------------------------------------------------------------------
+    -- Crear subventanas
+    function Panel:CreateWindow(WindowName)
+        local Window = Instance.new("Frame", Scrolling)
+        Window.Size = UDim2.new(0,200,1,-20)
+        Window.BackgroundColor3 = Color3.fromRGB(30,30,30)
+        Window.BorderSizePixel = 0
 
-    function Panel:Button(name, callback)
-        local Btn = Instance.new("TextButton", Scrolling)
-        Btn.Size = UDim2.new(0,120,0,50)
-        Btn.Text = name
-        Btn.Font = Enum.Font.Roboto
-        Btn.TextSize = 14
-        Btn.BackgroundColor3 = Color3.fromRGB(40,40,40)
-        Btn.TextColor3 = Color3.new(1,1,1)
-        Instance.new("UICorner", Btn).CornerRadius = UDim.new(0,6)
-        Btn.MouseButton1Click:Connect(callback or function()end)
+        local Corner = Instance.new("UICorner", Window)
+        Corner.CornerRadius = UDim.new(0,6)
+
+        local Title = Instance.new("TextLabel", Window)
+        Title.Size = UDim2.new(1,0,0,25)
+        Title.BackgroundColor3 = Color3.fromRGB(45,45,45)
+        Title.Text = WindowName
+        Title.TextColor3 = Color3.new(1,1,1)
+        Title.Font = Enum.Font.Roboto
+        Title.TextSize = 13
+
+        local Holder = Instance.new("Frame", Window)
+        Holder.Size = UDim2.new(1,0,1,-25)
+        Holder.Position = UDim2.new(0,0,0,25)
+        Holder.BackgroundTransparency = 1
+
+        local Layout = Instance.new("UIListLayout", Holder)
+        Layout.SortOrder = Enum.SortOrder.LayoutOrder
+        Layout.Padding = UDim.new(0,5)
+
+        -- Aquí puedes replicar las funciones Button, Toggle, Slider, etc. como en tu UI.txt
+        -- pero ahora metiéndolos dentro de "Holder" de cada ventana
+        -- location[flag] se sigue manejando igual
+
+        return Holder
     end
-
-    -- Puedes replicar Toggle, Slider, Dropdown, Bind, Box, Search, Section, Label
-    -- siguiendo exactamente la misma lógica que en tu UI.txt,
-    -- SOLO que ahora el "parent" debe ser `Scrolling` y cada uno tendrá
-    -- Width fijo y Height fijo (ej. 150x60) para encajar horizontalmente.
-    -- Los flags se manejan igual: location[flag] = valor
 
     return Panel
 end
