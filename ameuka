@@ -1,95 +1,102 @@
+-- Chaos UI - Versión arreglada (Botones en fila horizontal con scroll)
+-- Tema: Negro mate (3,3,3) + glow azul rey
+-- Incluye: Buttons (fila horizontal con glow y scroll), Labels, Toggles, Boxes, Sliders, Dropdowns, Binds
+-- Draggable, Resizable (PC + Mobile), Hide con F6
+-- Arreglado: ButtonRow es ahora un ScrollingFrame horizontal para evitar que los botones "bajen" cuando hay muchos.
+
 local Lib = {}
-if game.CoreGui:FindFirstChild("LibHorizontal") then
-    game.CoreGui:FindFirstChild("LibHorizontal"):Destroy()
+if game.CoreGui:FindFirstChild("LibHorizontalChaos") then
+    game.CoreGui.LibHorizontalChaos:Destroy()
 end
 
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-ScreenGui.Name = "LibHorizontal"
+ScreenGui.Name = "LibHorizontalChaos"
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
 ScreenGui.IgnoreGuiInset = true
 ScreenGui.ResetOnSpawn = false
 
-local Usp = game:GetService("UserInputService")
-local visible, Usable = true, true
-if _G.HideKeybind == nil then
-    _G.HideKeybind = Enum.KeyCode.F6
-end
-Usp.InputBegan:Connect(function(key,gp)
+local UserInputService = game:GetService("UserInputService")
+local visible, usable = true, true
+if _G.HideKeybind == nil then _G.HideKeybind = Enum.KeyCode.F6 end
+
+UserInputService.InputBegan:Connect(function(inp, gp)
     if gp then return end
-    if key.KeyCode == _G.HideKeybind and Usable then
-        Usable = false
-        for _,v in pairs(ScreenGui:GetChildren()) do
+    if inp.KeyCode == _G.HideKeybind and usable then
+        usable = false
+        for _, v in pairs(ScreenGui:GetChildren()) do
             if v:IsA("Frame") or v:IsA("ImageLabel") then
                 spawn(function()
                     if visible then
-                        v:TweenPosition(UDim2.new(v.Position.X.Scale,v.Position.X.Offset,0,-600),
-                            Enum.EasingDirection.In,Enum.EasingStyle.Sine,0.5,true)
-                        wait(0.4)
+                        v:TweenPosition(UDim2.new(v.Position.X.Scale, v.Position.X.Offset, 0, -600),
+                            Enum.EasingDirection.In, Enum.EasingStyle.Sine, 0.45, true)
+                        wait(0.35)
                         v.Visible = false
                     else
                         v.Visible = true
-                        v:TweenPosition(UDim2.new(v.Position.X.Scale,v.Position.X.Offset,0,120),
-                            Enum.EasingDirection.In,Enum.EasingStyle.Sine,0.5,true)
+                        v:TweenPosition(UDim2.new(v.Position.X.Scale, v.Position.X.Offset, 0, 120),
+                            Enum.EasingDirection.Out, Enum.EasingStyle.Sine, 0.45, true)
                     end
                 end)
             end
         end
-        wait(0.05)
-        Usable = true
+        wait(0.07)
+        usable = true
         visible = not visible
     end
 end)
 
-function Lib:CreatePanel(Name)
+function Lib:CreatePanel(name)
     local Panel = {}
+    Panel.flags = {}
     Panel.windows = {}
 
-    -- Main
+    -- Main frame
     local Main = Instance.new("Frame", ScreenGui)
     Main.Name = "Main"
     Main.Position = UDim2.new(0,150,0,150)
-    Main.Size = UDim2.new(0,850,0,500)
+    Main.Size = UDim2.new(0,900,0,520)
     Main.BackgroundColor3 = Color3.fromRGB(3,3,3)
-    Main.BackgroundTransparency = 0.15
+    Main.BackgroundTransparency = 0.12
     Main.BorderSizePixel = 0
-    Instance.new("UICorner", Main).CornerRadius = UDim.new(0,10)
+    Main.ZIndex = 2
+    local mc = Instance.new("UICorner", Main); mc.CornerRadius = UDim.new(0,12)
 
-    -- Glow azul alrededor del panel
+    -- Glow (pegado al borde)
     local Glow = Instance.new("ImageLabel", Main)
+    Glow.Name = "Glow"
     Glow.BackgroundTransparency = 1
     Glow.AnchorPoint = Vector2.new(0.5,0.5)
     Glow.Position = UDim2.new(0.5,0,0.5,0)
-    Glow.Size = UDim2.new(1,30,1,30)
-    Glow.ZIndex = 0
+    Glow.Size = UDim2.new(1,18,1,18)
+    Glow.ZIndex = 1
     Glow.Image = "rbxassetid://5028857084"
     Glow.ImageColor3 = Color3.fromRGB(0,80,200)
-    Glow.ImageTransparency = 0.25
+    Glow.ImageTransparency = 0.28
     Glow.ScaleType = Enum.ScaleType.Slice
     Glow.SliceCenter = Rect.new(24,24,276,276)
 
-    -- Title bar
+    -- TitleBar
     local TitleBar = Instance.new("Frame", Main)
-    TitleBar.Size = UDim2.new(1,0,0,40)
-    TitleBar.BackgroundColor3 = Color3.fromRGB(15,15,15)
-    TitleBar.BackgroundTransparency = 0.1
+    TitleBar.Name = "TitleBar"
+    TitleBar.Size = UDim2.new(1,0,0,44)
+    TitleBar.Position = UDim2.new(0,0,0,0)
+    TitleBar.BackgroundColor3 = Color3.fromRGB(12,12,12)
+    TitleBar.BackgroundTransparency = 0.06
     TitleBar.BorderSizePixel = 0
-    Instance.new("UICorner", TitleBar).CornerRadius = UDim.new(0,8)
+    TitleBar.ZIndex = 3
+    local tb = Instance.new("UICorner", TitleBar); tb.CornerRadius = UDim.new(0,10)
 
     local Title = Instance.new("TextLabel", TitleBar)
     Title.Size = UDim2.new(1,0,1,0)
     Title.BackgroundTransparency = 1
-    Title.Text = Name
+    Title.Text = name or "Chaos Adaptado"
     Title.Font = Enum.Font.GothamBold
     Title.TextSize = 16
-    Title.TextColor3 = Color3.fromRGB(230,230,255)
+    Title.TextColor3 = Color3.fromRGB(225,225,255)
+    Title.ZIndex = 4
 
-    -- Drag
-    local dragging, dragStart, startPos
-    local function updateDrag(input)
-        local delta = input.Position - dragStart
-        Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
-                                  startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
+    -- Drag (mouse + touch)
+    local dragging, dragStart, startPos = false, nil, nil
     TitleBar.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
@@ -102,29 +109,32 @@ function Lib:CreatePanel(Name)
             end)
         end
     end)
-    Usp.InputChanged:Connect(function(input)
+    UserInputService.InputChanged:Connect(function(input)
         if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            updateDrag(input)
+            local delta = input.Position - dragStart
+            Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+                                      startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
     end)
 
-    -- Resizer
+    -- Resizer (gris oscuro)
     local Resizer = Instance.new("Frame", Main)
-    Resizer.Size = UDim2.new(0,20,0,20)
+    Resizer.Name = "Resizer"
+    Resizer.Size = UDim2.new(0,24,0,24)
     Resizer.AnchorPoint = Vector2.new(1,1)
-    Resizer.Position = UDim2.new(1,0,1,0)
+    Resizer.Position = UDim2.new(1,4,1,4) -- slightly outside so it's easy to grab
     Resizer.BackgroundColor3 = Color3.fromRGB(40,40,40)
-    Resizer.BackgroundTransparency = 0.2
+    Resizer.BackgroundTransparency = 0.15
     Resizer.BorderSizePixel = 0
-    Instance.new("UICorner", Resizer).CornerRadius = UDim.new(1,0)
+    Resizer.ZIndex = 5
+    local rcr = Instance.new("UICorner", Resizer); rcr.CornerRadius = UDim.new(1,0)
 
-    local resizing = false
-    local resizeStart, startSize
+    local resizing, resizeStart, startSize = false, nil, nil
     Resizer.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             resizing = true
             resizeStart = input.Position
-            startSize = Main.Size
+            startSize = { X = Main.AbsoluteSize.X, Y = Main.AbsoluteSize.Y }
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then
                     resizing = false
@@ -132,188 +142,431 @@ function Lib:CreatePanel(Name)
             end)
         end
     end)
-    Usp.InputChanged:Connect(function(input)
+    UserInputService.InputChanged:Connect(function(input)
         if resizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             local delta = input.Position - resizeStart
-            Main.Size = UDim2.new(0, math.max(400, startSize.X.Offset + delta.X),
-                                     0, math.max(250, startSize.Y.Offset + delta.Y))
+            local newX = math.max(400, math.floor(startSize.X + delta.X))
+            local newY = math.max(260, math.floor(startSize.Y + delta.Y))
+            Main.Size = UDim2.new(0, newX, 0, newY)
         end
     end)
 
-    -- Tabs
+    -- Tabs Row
     local Tabs = Instance.new("Frame", Main)
-    Tabs.Position = UDim2.new(0,0,0,40)
-    Tabs.Size = UDim2.new(1,0,0,35)
+    Tabs.Name = "Tabs"
+    Tabs.Position = UDim2.new(0,0,0,44)
+    Tabs.Size = UDim2.new(1,0,0,40)
     Tabs.BackgroundTransparency = 1
-    local TabLayout = Instance.new("UIListLayout", Tabs)
-    TabLayout.FillDirection = Enum.FillDirection.Horizontal
-    TabLayout.Padding = UDim.new(0,10)
+    Tabs.ZIndex = 3
+    local TabsLayout = Instance.new("UIListLayout", Tabs)
+    TabsLayout.FillDirection = Enum.FillDirection.Horizontal
+    TabsLayout.Padding = UDim.new(0,8)
+    TabsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
 
-    -- Content
+    -- Content area
     local Content = Instance.new("Frame", Main)
-    Content.Position = UDim2.new(0,0,0,75)
-    Content.Size = UDim2.new(1,0,1,-75)
-    Content.BackgroundTransparency = 0.15
+    Content.Name = "Content"
+    Content.Position = UDim2.new(0,0,0,88)
+    Content.Size = UDim2.new(1,0,1,-92)
     Content.BackgroundColor3 = Color3.fromRGB(5,5,5)
-    Instance.new("UICorner", Content).CornerRadius = UDim.new(0,10)
+    Content.BackgroundTransparency = 0.08
+    Content.BorderSizePixel = 0
+    Content.ZIndex = 3
+    local contentCorner = Instance.new("UICorner", Content); contentCorner.CornerRadius = UDim.new(0,10)
 
-    -- Crear ventana/tab
-    function Panel:CreateWindow(WindowName)
-        local Window = {}
+    -- Function to create a window/tab
+    function Panel:CreateWindow(windowName)
+        local selfwin = {}
         local TabBtn = Instance.new("TextButton", Tabs)
-        TabBtn.Size = UDim2.new(0,120,1,0)
-        TabBtn.Text = WindowName
+        TabBtn.Size = UDim2.new(0,140,1,0)
+        TabBtn.Text = windowName
         TabBtn.Font = Enum.Font.Gotham
         TabBtn.TextSize = 14
-        TabBtn.BackgroundColor3 = Color3.fromRGB(20,20,20)
+        TabBtn.BackgroundColor3 = Color3.fromRGB(18,18,18)
+        TabBtn.BackgroundTransparency = 0.08
         TabBtn.TextColor3 = Color3.fromRGB(220,220,255)
-        Instance.new("UICorner", TabBtn).CornerRadius = UDim.new(0,6)
+        TabBtn.AutoButtonColor = true
+        local tabCorner = Instance.new("UICorner", TabBtn); tabCorner.CornerRadius = UDim.new(0,6)
 
         local Holder = Instance.new("ScrollingFrame", Content)
         Holder.Size = UDim2.new(1,0,1,0)
-        Holder.Visible = false
+        Holder.CanvasSize = UDim2.new(0,0,0,0)
         Holder.BackgroundTransparency = 1
-        Holder.ScrollBarThickness = 6
+        Holder.ScrollBarThickness = 8
+        Holder.Visible = false
+        Holder.ZIndex = 4
 
-        local Layout = Instance.new("UIListLayout", Holder)
-        Layout.Padding = UDim.new(0,6)
-        Layout.SortOrder = Enum.SortOrder.LayoutOrder
+        local holderLayout = Instance.new("UIListLayout", Holder)
+        holderLayout.FillDirection = Enum.FillDirection.Vertical
+        holderLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        holderLayout.Padding = UDim.new(0,8)
 
-        -- Secciones
-        local ButtonRow = Instance.new("Frame", Holder)
+        -- Top: ButtonRow (horizontal scrolling)
+        local ButtonRow = Instance.new("ScrollingFrame", Holder)
         ButtonRow.Name = "ButtonRow"
-        ButtonRow.Size = UDim2.new(1,0,0,70)
+        ButtonRow.Size = UDim2.new(1, -20, 0, 64)
+        ButtonRow.Position = UDim2.new(0,10,0,0)
         ButtonRow.BackgroundTransparency = 1
+        ButtonRow.ScrollBarThickness = 6
+        ButtonRow.CanvasSize = UDim2.new(0,0,0,0)
+        ButtonRow.ScrollingDirection = Enum.ScrollingDirection.X
+        ButtonRow.BorderSizePixel = 0
+        ButtonRow.ZIndex = 4
+
         local ButtonLayout = Instance.new("UIListLayout", ButtonRow)
         ButtonLayout.FillDirection = Enum.FillDirection.Horizontal
-        ButtonLayout.Padding = UDim.new(0,15)
         ButtonLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
-        ButtonLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+        ButtonLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        ButtonLayout.Padding = UDim.new(0,14)
 
+        -- Update canvassize so horizontal scroll works and buttons don't wrap
+        ButtonLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+            ButtonRow.CanvasSize = UDim2.new(0, ButtonLayout.AbsoluteContentSize.X + 16, 0, 0)
+        end)
+
+        -- Spacer under buttons to separate from other controls
+        local ButtonsSpacer = Instance.new("Frame", Holder)
+        ButtonsSpacer.Name = "ButtonsSpacer"
+        ButtonsSpacer.Size = UDim2.new(1,0,0,8)
+        ButtonsSpacer.BackgroundTransparency = 1
+
+        -- OtherRow for vertical controls
         local OtherRow = Instance.new("Frame", Holder)
         OtherRow.Name = "OtherRow"
-        OtherRow.Size = UDim2.new(1,0,0,0)
-        OtherRow.Position = UDim2.new(0,0,0,10)
+        OtherRow.Size = UDim2.new(1, -20, 0, 0)
+        OtherRow.Position = UDim2.new(0,10,0,0)
         OtherRow.BackgroundTransparency = 1
+        OtherRow.ZIndex = 4
         local OtherLayout = Instance.new("UIListLayout", OtherRow)
         OtherLayout.FillDirection = Enum.FillDirection.Vertical
-        OtherLayout.Padding = UDim.new(0,6)
+        OtherLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        OtherLayout.Padding = UDim.new(0,8)
 
+        -- Show/hide holder
         TabBtn.MouseButton1Click:Connect(function()
-            for _,w in pairs(Content:GetChildren()) do
-                if w:IsA("ScrollingFrame") then
-                    w.Visible = false
+            for _, c in pairs(Content:GetChildren()) do
+                if c:IsA("ScrollingFrame") then
+                    c.Visible = false
                 end
             end
             Holder.Visible = true
         end)
 
-        -- Funciones
-        function Window:Button(txt, callback)
-            local BtnContainer = Instance.new("Frame", ButtonRow)
-            BtnContainer.Size = UDim2.new(0,120,0,40)
-            BtnContainer.BackgroundTransparency = 1
+        -- ========== ELEMENT CREATION FUNCTIONS ==========
 
-            local Glow = Instance.new("ImageLabel", BtnContainer)
-            Glow.BackgroundTransparency = 1
-            Glow.AnchorPoint = Vector2.new(0.5,0.5)
-            Glow.Position = UDim2.new(0.5,0,0.5,0)
-            Glow.Size = UDim2.new(1.25,0,1.6,0)
-            Glow.Image = "rbxassetid://5028857084"
-            Glow.ImageColor3 = Color3.fromRGB(0,80,200)
-            Glow.ImageTransparency = 0.25
-            Glow.ScaleType = Enum.ScaleType.Slice
-            Glow.SliceCenter = Rect.new(24,24,276,276)
+        -- Helper: create button in ButtonRow with glow
+        function selfwin:Button(text, callback)
+            local BtnContainer = Instance.new("Frame", ButtonRow)
+            BtnContainer.Size = UDim2.new(0,140,0,54)
+            BtnContainer.BackgroundTransparency = 1
+            BtnContainer.LayoutOrder = 1
+
+            local glow = Instance.new("ImageLabel", BtnContainer)
+            glow.Name = "BtnGlow"
+            glow.AnchorPoint = Vector2.new(0.5,0.5)
+            glow.Position = UDim2.new(0.5,0,0.5,0)
+            glow.Size = UDim2.new(1.08,0,1.24,0)
+            glow.BackgroundTransparency = 1
+            glow.Image = "rbxassetid://5028857084"
+            glow.ImageColor3 = Color3.fromRGB(0,80,200)
+            glow.ImageTransparency = 0.26
+            glow.ScaleType = Enum.ScaleType.Slice
+            glow.SliceCenter = Rect.new(24,24,276,276)
+            glow.ZIndex = 3
 
             local Btn = Instance.new("TextButton", BtnContainer)
             Btn.Size = UDim2.new(1,0,1,0)
-            Btn.Text = txt
-            Btn.Font = Enum.Font.Gotham
+            Btn.Position = UDim2.new(0,0,0,0)
+            Btn.AutoButtonColor = true
+            Btn.Text = text
+            Btn.Font = Enum.Font.GothamBold
             Btn.TextSize = 14
-            Btn.BackgroundColor3 = Color3.fromRGB(25,25,25)
-            Btn.TextColor3 = Color3.new(1,1,1)
-            Instance.new("UICorner", Btn).CornerRadius = UDim.new(0,6)
+            Btn.BackgroundColor3 = Color3.fromRGB(20,20,20)
+            Btn.BackgroundTransparency = 0.08
+            Btn.TextColor3 = Color3.fromRGB(235,235,255)
+            Btn.ZIndex = 4
+            local bcr = Instance.new("UICorner", Btn); bcr.CornerRadius = UDim.new(0,8)
 
-            Btn.MouseButton1Click:Connect(callback or function()end)
+            Btn.MouseButton1Click:Connect(function()
+                pcall(function() if callback then callback() end end)
+            end)
+
+            return Btn
         end
 
-        function Window:Label(txt)
+        -- Label
+        function selfwin:Label(text)
             local L = Instance.new("TextLabel", OtherRow)
-            L.Size = UDim2.new(1,0,0,25)
+            L.Size = UDim2.new(1,0,0,24)
             L.BackgroundTransparency = 1
-            L.Text = txt
+            L.Text = text
             L.TextColor3 = Color3.fromRGB(220,220,255)
             L.Font = Enum.Font.Gotham
             L.TextSize = 13
+            L.TextXAlignment = Enum.TextXAlignment.Left
+            return L
         end
 
-        function Window:Toggle(txt, default, callback)
-            local T = Instance.new("TextButton", OtherRow)
-            T.Size = UDim2.new(1,0,0,30)
-            T.BackgroundColor3 = Color3.fromRGB(30,30,30)
-            T.Text = txt.." : "..(default and "ON" or "OFF")
-            T.TextColor3 = Color3.fromRGB(255,255,255)
-            local state = default
-            T.MouseButton1Click:Connect(function()
-                state = not state
-                T.Text = txt.." : "..(state and "ON" or "OFF")
-                if callback then callback(state) end
+        -- Toggle
+        function selfwin:Toggle(text, default, callback)
+            local Container = Instance.new("Frame", OtherRow)
+            Container.Size = UDim2.new(1,0,0,34)
+            Container.BackgroundTransparency = 1
+            local lbl = Instance.new("TextLabel", Container)
+            lbl.Size = UDim2.new(0.78,0,1,0)
+            lbl.BackgroundTransparency = 1
+            lbl.Text = text
+            lbl.Font = Enum.Font.Gotham
+            lbl.TextSize = 14
+            lbl.TextColor3 = Color3.fromRGB(220,220,255)
+            lbl.TextXAlignment = Enum.TextXAlignment.Left
+
+            local toggleBack = Instance.new("Frame", Container)
+            toggleBack.Size = UDim2.new(0.18, -6, 0.6, 0)
+            toggleBack.Position = UDim2.new(0.82, 6, 0.2, 0)
+            toggleBack.BackgroundColor3 = Color3.fromRGB(28,28,28)
+            toggleBack.BorderSizePixel = 0
+            local tcr = Instance.new("UICorner", toggleBack); tcr.CornerRadius = UDim.new(1,0)
+            local toggler = Instance.new("Frame", toggleBack)
+            toggler.Size = UDim2.new(default and 0.5 or 0,0,1,0)
+            toggler.BackgroundColor3 = default and Color3.fromRGB(0,120,255) or Color3.fromRGB(80,80,80)
+            toggler.BorderSizePixel = 0
+            local tr = Instance.new("UICorner", toggler); tr.CornerRadius = UDim.new(1,0)
+
+            local state = default or false
+            local function setState(val)
+                state = val
+                if state then
+                    toggler:TweenSize(UDim2.new(0.5,0,1,0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
+                    toggler.BackgroundColor3 = Color3.fromRGB(0,120,255)
+                else
+                    toggler:TweenSize(UDim2.new(0,0,1,0), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.15, true)
+                    toggler.BackgroundColor3 = Color3.fromRGB(80,80,80)
+                end
+                pcall(function() if callback then callback(state) end end)
+            end
+
+            Container.InputBegan:Connect(function(inp)
+                if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
+                    setState(not state)
+                end
             end)
+
+            return { Frame = Container, Get = function() return state end, Set = setState }
         end
 
-        function Window:Box(txt, callback)
+        -- Box (TextBox)
+        function selfwin:Box(placeholder, callback)
             local Box = Instance.new("TextBox", OtherRow)
-            Box.Size = UDim2.new(1,0,0,30)
-            Box.PlaceholderText = txt
-            Box.Text = ""
-            Box.BackgroundColor3 = Color3.fromRGB(25,25,25)
-            Box.TextColor3 = Color3.fromRGB(255,255,255)
-            Box.FocusLost:Connect(function()
-                if callback then callback(Box.Text) end
+            Box.Size = UDim2.new(1,0,0,32)
+            Box.BackgroundColor3 = Color3.fromRGB(20,20,20)
+            Box.TextColor3 = Color3.fromRGB(230,230,230)
+            Box.PlaceholderText = placeholder or ""
+            Box.Font = Enum.Font.Gotham
+            Box.TextSize = 14
+            Box.ClearTextOnFocus = false
+            Box.FocusLost:Connect(function(enter)
+                pcall(function()
+                    if callback then callback(Box.Text) end
+                end)
             end)
+            local bc = Instance.new("UICorner", Box); bc.CornerRadius = UDim.new(0,6)
+            return Box
         end
 
-        function Window:Slider(txt, min, max, default, callback)
+        -- Slider
+        function selfwin:Slider(text, min, max, default, callback)
             local Frame = Instance.new("Frame", OtherRow)
-            Frame.Size = UDim2.new(1,0,0,40)
+            Frame.Size = UDim2.new(1,0,0,48)
             Frame.BackgroundTransparency = 1
 
             local Label = Instance.new("TextLabel", Frame)
-            Label.Size = UDim2.new(1,0,0.5,0)
+            Label.Size = UDim2.new(1,0,0,18)
             Label.BackgroundTransparency = 1
-            Label.Text = txt.." : "..default
-            Label.TextColor3 = Color3.fromRGB(255,255,255)
+            Label.Text = (text or "Slider").." : "..tostring(default or min)
+            Label.Font = Enum.Font.Gotham
+            Label.TextSize = 13
+            Label.TextColor3 = Color3.fromRGB(230,230,255)
+            Label.TextXAlignment = Enum.TextXAlignment.Left
 
-            local SliderBack = Instance.new("Frame", Frame)
-            SliderBack.Size = UDim2.new(1,0,0.5,0)
-            SliderBack.Position = UDim2.new(0,0,0.5,0)
-            SliderBack.BackgroundColor3 = Color3.fromRGB(30,30,30)
+            local BarBack = Instance.new("Frame", Frame)
+            BarBack.Size = UDim2.new(1,0,0,18)
+            BarBack.Position = UDim2.new(0,0,0,26)
+            BarBack.BackgroundColor3 = Color3.fromRGB(28,28,28)
+            BarBack.BorderSizePixel = 0
+            local br = Instance.new("UICorner", BarBack); br.CornerRadius = UDim.new(0,6)
 
-            local Fill = Instance.new("Frame", SliderBack)
-            Fill.Size = UDim2.new((default-min)/(max-min),0,1,0)
-            Fill.BackgroundColor3 = Color3.fromRGB(0,80,200)
+            local Fill = Instance.new("Frame", BarBack)
+            Fill.Size = UDim2.new( ((default or min)-min)/(max-min), 0, 1, 0)
+            Fill.BackgroundColor3 = Color3.fromRGB(0,120,255)
+            local fr = Instance.new("UICorner", Fill); fr.CornerRadius = UDim.new(0,6)
 
-            local function setValue(x)
-                local pct = math.clamp((x-SliderBack.AbsolutePosition.X)/SliderBack.AbsoluteSize.X,0,1)
-                local val = math.floor(min + (max-min)*pct)
-                Fill.Size = UDim2.new(pct,0,1,0)
-                Label.Text = txt.." : "..val
-                if callback then callback(val) end
+            local draggingSlider = false
+            local function updateFromPos(x)
+                local absX = BarBack.AbsolutePosition.X
+                local absW = BarBack.AbsoluteSize.X
+                local pct = math.clamp((x - absX) / absW, 0, 1)
+                Fill.Size = UDim2.new(pct, 0, 1, 0)
+                local val = math.floor(min + (max - min) * pct)
+                Label.Text = (text or "Slider").." : "..tostring(val)
+                pcall(function() if callback then callback(val) end end)
             end
 
-            SliderBack.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                    setValue(input.Position.X)
+            BarBack.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    draggingSlider = true
+                    updateFromPos(input.Position.X)
                 end
             end)
-            SliderBack.InputChanged:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseMovement and Usp:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
-                    setValue(input.Position.X)
+            UserInputService.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    draggingSlider = false
                 end
             end)
+            UserInputService.InputChanged:Connect(function(input)
+                if draggingSlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                    updateFromPos(input.Position.X)
+                end
+            end)
+
+            return { Frame = Frame }
         end
 
-        return Window
+        -- Dropdown
+        function selfwin:Dropdown(text, list, default, callback)
+            local Container = Instance.new("Frame", OtherRow)
+            Container.Size = UDim2.new(1,0,0,36)
+            Container.BackgroundTransparency = 1
+
+            local Label = Instance.new("TextLabel", Container)
+            Label.Size = UDim2.new(0.45,0,1,0)
+            Label.BackgroundTransparency = 1
+            Label.Text = text
+            Label.TextColor3 = Color3.fromRGB(220,220,255)
+            Label.Font = Enum.Font.Gotham
+            Label.TextSize = 13
+            Label.TextXAlignment = Enum.TextXAlignment.Left
+
+            local sel = Instance.new("TextButton", Container)
+            sel.Size = UDim2.new(0.5,0,1,0)
+            sel.Position = UDim2.new(0.5,4,0,0)
+            sel.Text = tostring(default or (list and list[1]) or "")
+            sel.Font = Enum.Font.Gotham
+            sel.TextSize = 13
+            sel.BackgroundColor3 = Color3.fromRGB(26,26,26)
+            sel.TextColor3 = Color3.fromRGB(230,230,230)
+            local scr = Instance.new("UICorner", sel); scr.CornerRadius = UDim.new(0,6)
+
+            local DropdownFrame = Instance.new("Frame", Container)
+            DropdownFrame.Position = UDim2.new(0,0,0,36)
+            DropdownFrame.Size = UDim2.new(0,180,0,0)
+            DropdownFrame.BackgroundColor3 = Color3.fromRGB(18,18,18)
+            DropdownFrame.BorderSizePixel = 0
+            DropdownFrame.Visible = false
+            local dcr = Instance.new("UICorner", DropdownFrame); dcr.CornerRadius = UDim.new(0,6)
+            local dlist = Instance.new("UIListLayout", DropdownFrame)
+            dlist.Padding = UDim.new(0,4)
+
+            local open = false
+            sel.MouseButton1Click:Connect(function()
+                open = not open
+                if open then
+                    DropdownFrame:ClearAllChildren()
+                    local dl = Instance.new("UIListLayout", DropdownFrame)
+                    dl.Padding = UDim.new(0,4)
+                    local y = 0
+                    for i, v in ipairs(list or {}) do
+                        local it = Instance.new("TextButton", DropdownFrame)
+                        it.Size = UDim2.new(1,0,0,28)
+                        it.Position = UDim2.new(0,0,0,y)
+                        it.Text = tostring(v)
+                        it.Font = Enum.Font.Gotham
+                        it.TextSize = 13
+                        it.BackgroundColor3 = Color3.fromRGB(20,20,20)
+                        it.TextColor3 = Color3.fromRGB(230,230,230)
+                        local icr = Instance.new("UICorner", it); icr.CornerRadius = UDim.new(0,6)
+                        it.MouseButton1Click:Connect(function()
+                            sel.Text = tostring(v)
+                            DropdownFrame.Visible = false
+                            open = false
+                            pcall(function() if callback then callback(v) end end)
+                        end)
+                        y = y + 32
+                    end
+                    DropdownFrame.Size = UDim2.new(0, 180, 0, #list * 32)
+                    DropdownFrame.Visible = true
+                else
+                    DropdownFrame.Visible = false
+                end
+            end)
+
+            return { Set = function(val) sel.Text = tostring(val) end, Get = function() return sel.Text end }
+        end
+
+        -- Key Bind
+        function selfwin:Bind(text, defaultKey, callback)
+            local Container = Instance.new("Frame", OtherRow)
+            Container.Size = UDim2.new(1,0,0,34)
+            Container.BackgroundTransparency = 1
+
+            local label = Instance.new("TextLabel", Container)
+            label.Size = UDim2.new(0.6,0,1,0)
+            label.BackgroundTransparency = 1
+            label.Text = text
+            label.Font = Enum.Font.Gotham
+            label.TextSize = 13
+            label.TextColor3 = Color3.fromRGB(220,220,255)
+            label.TextXAlignment = Enum.TextXAlignment.Left
+
+            local keyBtn = Instance.new("TextButton", Container)
+            keyBtn.Size = UDim2.new(0.35, -6, 0.7, 0)
+            keyBtn.Position = UDim2.new(0.64, 6, 0.15, 0)
+            keyBtn.Text = tostring(defaultKey or "None")
+            keyBtn.Font = Enum.Font.Gotham
+            keyBtn.TextSize = 13
+            keyBtn.BackgroundColor3 = Color3.fromRGB(26,26,26)
+            keyBtn.TextColor3 = Color3.fromRGB(230,230,230)
+            local kcr = Instance.new("UICorner", keyBtn); kcr.CornerRadius = UDim.new(0,6)
+
+            local waiting = false
+            keyBtn.MouseButton1Click:Connect(function()
+                keyBtn.Text = "Press a key..."
+                waiting = true
+            end)
+            local boundKey = defaultKey
+            local conn
+            conn = UserInputService.InputBegan:Connect(function(input, gp)
+                if gp then return end
+                if waiting and input.UserInputType == Enum.UserInputType.Keyboard then
+                    boundKey = input.KeyCode
+                    keyBtn.Text = tostring(boundKey)
+                    waiting = false
+                    pcall(function() if callback then callback(boundKey) end end)
+                end
+            end)
+
+            return { Get = function() return boundKey end, Set = function(k) boundKey = k; keyBtn.Text = tostring(k) end }
+        end
+
+        -- Expose the holder and rows for advanced use if needed
+        selfwin._Holder = Holder
+        selfwin._ButtonRow = ButtonRow
+        selfwin._OtherRow = OtherRow
+
+        -- Make sure Holder canvas resizes with contents (vertical)
+        local function updateHolderCanvas()
+            local tot = 0
+            for _,c in pairs(Holder:GetChildren()) do
+                if c:IsA("Frame") or c:IsA("ScrollingFrame") then
+                    tot = tot + c.AbsoluteSize.Y + 8 -- spacing
+                end
+            end
+            Holder.CanvasSize = UDim2.new(0,0,0, tot + 12)
+        end
+        holderLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateHolderCanvas)
+        ButtonLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateHolderCanvas)
+
+        return selfwin
     end
 
     return Panel
