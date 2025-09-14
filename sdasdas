@@ -1,0 +1,61 @@
+function Window:Button(txt, callback)
+    if not Holder:FindFirstChild("ButtonRow") then
+        local ButtonRow = Instance.new("Frame", Holder)
+        ButtonRow.Name = "ButtonRow"
+        ButtonRow.Size = UDim2.new(1,0,0,60)
+        ButtonRow.BackgroundTransparency = 1
+
+        local Layout = Instance.new("UIListLayout", ButtonRow)
+        Layout.FillDirection = Enum.FillDirection.Horizontal
+        Layout.SortOrder = Enum.SortOrder.LayoutOrder
+        Layout.Padding = UDim.new(0,10)
+    end
+
+    local BtnContainer = Instance.new("Frame", Holder.ButtonRow)
+    BtnContainer.Size = UDim2.new(0,120,0,40)
+    BtnContainer.BackgroundTransparency = 1
+
+    -- Glow azul pegado al botón
+    local Glow = Instance.new("ImageLabel", BtnContainer)
+    Glow.BackgroundTransparency = 1
+    Glow.AnchorPoint = Vector2.new(0.5,0.5)
+    Glow.Position = UDim2.new(0.5,0,0.5,0)
+    Glow.Size = UDim2.new(1.1,0,1.3,0)
+    Glow.Image = "rbxassetid://5028857084"
+    Glow.ImageColor3 = Color3.fromRGB(0,80,200)
+    Glow.ImageTransparency = 0.25
+    Glow.ScaleType = Enum.ScaleType.Slice
+    Glow.SliceCenter = Rect.new(24,24,276,276)
+
+    local Btn = Instance.new("TextButton", BtnContainer)
+    Btn.Size = UDim2.new(1,0,1,0)
+    Btn.Text = txt
+    Btn.Font = Enum.Font.Gotham
+    Btn.TextSize = 14
+    Btn.BackgroundColor3 = Color3.fromRGB(25,25,25)
+    Btn.TextColor3 = Color3.new(1,1,1)
+    Btn.AutoButtonColor = true
+    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0,6)
+
+    Btn.MouseButton1Click:Connect(callback or function()end)
+end
+
+function Window:Label(txt)
+    if not Holder:FindFirstChild("OtherRow") then
+        local OtherRow = Instance.new("Frame", Holder)
+        OtherRow.Name = "OtherRow"
+        OtherRow.Size = UDim2.new(1,0,0,0)
+        OtherRow.BackgroundTransparency = 1
+        local Layout = Instance.new("UIListLayout", OtherRow)
+        Layout.FillDirection = Enum.FillDirection.Vertical
+        Layout.Padding = UDim.new(0,6)
+    end
+
+    local L = Instance.new("TextLabel", Holder.OtherRow)
+    L.Size = UDim2.new(1,0,0,25)
+    L.BackgroundTransparency = 1
+    L.Text = txt
+    L.TextColor3 = Color3.fromRGB(220,220,255)
+    L.Font = Enum.Font.Gotham
+    L.TextSize = 13
+end
