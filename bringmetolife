@@ -1,0 +1,310 @@
+-- Chaos UI Final con Botones Rectangulares + Glow + Grid + Scroll + Dropdowns Normales y de Jugadores
+-- Tema negro mate (3,3,3) con transparencia ligera
+-- Glow azul en el borde del UI y en botones
+-- Draggable, Resizable, Hide con F6
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+
+local Lib = {}
+if game.CoreGui:FindFirstChild("LibChaosFinal") then
+    game.CoreGui.LibChaosFinal:Destroy()
+end
+
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+ScreenGui.Name = "LibChaosFinal"
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+ScreenGui.IgnoreGuiInset = true
+ScreenGui.ResetOnSpawn = false
+
+local visible, Usable = true, true
+if _G.HideKeybind == nil then _G.HideKeybind = Enum.KeyCode.F6 end
+
+UserInputService.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    if input.KeyCode == _G.HideKeybind and Usable then
+        Usable = false
+        for _,v in pairs(ScreenGui:GetChildren()) do
+            if v:IsA("Frame") or v:IsA("ImageLabel") then
+                spawn(function()
+                    if visible then
+                        v:TweenPosition(UDim2.new(v.Position.X.Scale,v.Position.X.Offset,0,-600),
+                            Enum.EasingDirection.In,Enum.EasingStyle.Sine,0.5,true)
+                        wait(0.4)
+                        v.Visible = false
+                    else
+                        v.Visible = true
+                        v:TweenPosition(UDim2.new(v.Position.X.Scale,v.Position.X.Offset,0,120),
+                            Enum.EasingDirection.Out,Enum.EasingStyle.Sine,0.5,true)
+                    end
+                end)
+            end
+        end
+        wait(0.05)
+        Usable = true
+        visible = not visible
+    end
+end)
+
+function Lib:CreatePanel(Name)
+    local Panel = {}
+    Panel.windows = {}
+
+    local Main = Instance.new("Frame", ScreenGui)
+    Main.Name = "Main"
+    Main.Position = UDim2.new(0,150,0,150)
+    Main.Size = UDim2.new(0,850,0,500)
+    Main.BackgroundColor3 = Color3.fromRGB(3,3,3)
+    Main.BackgroundTransparency = 0.15
+    Main.BorderSizePixel = 0
+    Instance.new("UICorner", Main).CornerRadius = UDim.new(0,10)
+
+    local Glow = Instance.new("ImageLabel", Main)
+    Glow.BackgroundTransparency = 1
+    Glow.AnchorPoint = Vector2.new(0.5,0.5)
+    Glow.Position = UDim2.new(0.5,0,0.5,0)
+    Glow.Size = UDim2.new(1,30,1,30)
+    Glow.ZIndex = 0
+    Glow.Image = "rbxassetid://5028857084"
+    Glow.ImageColor3 = Color3.fromRGB(0,80,200)
+    Glow.ImageTransparency = 0.25
+    Glow.ScaleType = Enum.ScaleType.Slice
+    Glow.SliceCenter = Rect.new(24,24,276,276)
+
+    local TitleBar = Instance.new("Frame", Main)
+    TitleBar.Size = UDim2.new(1,0,0,40)
+    TitleBar.BackgroundColor3 = Color3.fromRGB(15,15,15)
+    TitleBar.BackgroundTransparency = 0.1
+    TitleBar.BorderSizePixel = 0
+    Instance.new("UICorner", TitleBar).CornerRadius = UDim.new(0,8)
+
+    local Title = Instance.new("TextLabel", TitleBar)
+    Title.Size = UDim2.new(1,0,1,0)
+    Title.BackgroundTransparency = 1
+    Title.Text = Name
+    Title.Font = Enum.Font.GothamBold
+    Title.TextSize = 16
+    Title.TextColor3 = Color3.fromRGB(230,230,255)
+
+    -- Dragging
+    local dragging, dragStart, startPos
+    TitleBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = Main.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
+            Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+                                      startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+
+    -- Resizer
+    local Resizer = Instance.new("Frame", Main)
+    Resizer.Size = UDim2.new(0,20,0,20)
+    Resizer.AnchorPoint = Vector2.new(1,1)
+    Resizer.Position = UDim2.new(1,0,1,0)
+    Resizer.BackgroundColor3 = Color3.fromRGB(40,40,40)
+    Resizer.BackgroundTransparency = 0.2
+    Resizer.BorderSizePixel = 0
+    Instance.new("UICorner", Resizer).CornerRadius = UDim.new(1,0)
+
+    local resizing, resizeStart, startSize
+    Resizer.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            resizing = true
+            resizeStart = input.Position
+            startSize = Main.Size
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    resizing = false
+                end
+            end)
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if resizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - resizeStart
+            Main.Size = UDim2.new(0, math.max(400, startSize.X.Offset + delta.X),
+                                     0, math.max(250, startSize.Y.Offset + delta.Y))
+        end
+    end)
+
+    local Tabs = Instance.new("Frame", Main)
+    Tabs.Position = UDim2.new(0,0,0,40)
+    Tabs.Size = UDim2.new(1,0,0,35)
+    Tabs.BackgroundTransparency = 1
+    local TabLayout = Instance.new("UIListLayout", Tabs)
+    TabLayout.FillDirection = Enum.FillDirection.Horizontal
+    TabLayout.Padding = UDim.new(0,10)
+
+    local Content = Instance.new("Frame", Main)
+    Content.Position = UDim2.new(0,0,0,75)
+    Content.Size = UDim2.new(1,0,1,-75)
+    Content.BackgroundTransparency = 0.15
+    Content.BackgroundColor3 = Color3.fromRGB(5,5,5)
+    Instance.new("UICorner", Content).CornerRadius = UDim.new(0,10)
+
+    function Panel:CreateWindow(WindowName)
+        local Window = {}
+        local TabBtn = Instance.new("TextButton", Tabs)
+        TabBtn.Size = UDim2.new(0,120,1,0)
+        TabBtn.Text = WindowName
+        TabBtn.Font = Enum.Font.Gotham
+        TabBtn.TextSize = 14
+        TabBtn.BackgroundColor3 = Color3.fromRGB(20,20,20)
+        TabBtn.BackgroundTransparency = 0.1
+        TabBtn.TextColor3 = Color3.fromRGB(220,220,255)
+        Instance.new("UICorner", TabBtn).CornerRadius = UDim.new(0,6)
+
+        local Holder = Instance.new("ScrollingFrame", Content)
+        Holder.Size = UDim2.new(1,0,1,0)
+        Holder.Visible = false
+        Holder.BackgroundTransparency = 1
+        Holder.ScrollBarThickness = 6
+
+        local Grid = Instance.new("UIGridLayout", Holder)
+        Grid.CellSize = UDim2.new(0,180,0,36)
+        Grid.CellPadding = UDim.new(0,10,0,10)
+        Grid.FillDirection = Enum.FillDirection.Horizontal
+        Grid.SortOrder = Enum.SortOrder.LayoutOrder
+
+        TabBtn.MouseButton1Click:Connect(function()
+            for _,w in pairs(Content:GetChildren()) do
+                if w:IsA("ScrollingFrame") then
+                    w.Visible = false
+                end
+            end
+            Holder.Visible = true
+        end)
+
+        function Window:Button(txt, callback)
+            local Btn = Instance.new("TextButton", Holder)
+            Btn.Size = UDim2.new(0,180,0,36)
+            Btn.Text = txt
+            Btn.Font = Enum.Font.GothamBold
+            Btn.TextSize = 14
+            Btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+            Btn.TextColor3 = Color3.new(1,1,1)
+            Instance.new("UICorner", Btn).CornerRadius = UDim.new(0,6)
+            Btn.MouseButton1Click:Connect(callback or function()end)
+
+            local GlowB = Instance.new("ImageLabel", Btn)
+            GlowB.BackgroundTransparency = 1
+            GlowB.AnchorPoint = Vector2.new(0.5,0.5)
+            GlowB.Position = UDim2.new(0.5,0,0.5,0)
+            GlowB.Size = UDim2.new(1.2,0,1.8,0)
+            GlowB.ZIndex = 0
+            GlowB.Image = "rbxassetid://5028857084"
+            GlowB.ImageColor3 = Color3.fromRGB(0,80,200)
+            GlowB.ImageTransparency = 0.3
+            GlowB.ScaleType = Enum.ScaleType.Slice
+            GlowB.SliceCenter = Rect.new(24,24,276,276)
+        end
+
+        function Window:Dropdown(txt, options, callback)
+            local Drop = Instance.new("TextButton", Holder)
+            Drop.Size = UDim2.new(0,180,0,36)
+            Drop.Text = txt.." ▼"
+            Drop.Font = Enum.Font.Gotham
+            Drop.TextSize = 14
+            Drop.BackgroundColor3 = Color3.fromRGB(30,30,30)
+            Drop.TextColor3 = Color3.fromRGB(255,255,255)
+            Instance.new("UICorner", Drop).CornerRadius = UDim.new(0,6)
+
+            local List = Instance.new("Frame", Holder)
+            List.Size = UDim2.new(0,180,0,#options*30)
+            List.BackgroundColor3 = Color3.fromRGB(25,25,25)
+            List.Visible = false
+
+            local Layout = Instance.new("UIListLayout", List)
+            Layout.SortOrder = Enum.SortOrder.LayoutOrder
+
+            for _,opt in pairs(options) do
+                local B = Instance.new("TextButton", List)
+                B.Size = UDim2.new(1,0,0,30)
+                B.Text = opt
+                B.Font = Enum.Font.Gotham
+                B.TextSize = 13
+                B.BackgroundColor3 = Color3.fromRGB(35,35,35)
+                B.TextColor3 = Color3.new(1,1,1)
+                B.MouseButton1Click:Connect(function()
+                    Drop.Text = txt.." : "..opt
+                    List.Visible = false
+                    if callback then callback(opt) end
+                end)
+            end
+
+            Drop.MouseButton1Click:Connect(function()
+                List.Visible = not List.Visible
+            end)
+        end
+
+        function Window:PlayerDropdown(txt, callback)
+            local Drop = Instance.new("TextButton", Holder)
+            Drop.Size = UDim2.new(0,200,0,36)
+            Drop.Text = txt.." ▼"
+            Drop.Font = Enum.Font.Gotham
+            Drop.TextSize = 14
+            Drop.BackgroundColor3 = Color3.fromRGB(30,30,30)
+            Drop.TextColor3 = Color3.fromRGB(255,255,255)
+            Instance.new("UICorner", Drop).CornerRadius = UDim.new(0,6)
+
+            local List = Instance.new("Frame", Holder)
+            List.Size = UDim2.new(0,200,0,150)
+            List.BackgroundColor3 = Color3.fromRGB(25,25,25)
+            List.Visible = false
+            local UIList = Instance.new("UIListLayout", List)
+            UIList.SortOrder = Enum.SortOrder.LayoutOrder
+
+            local function refresh()
+                for _,c in pairs(List:GetChildren()) do
+                    if c:IsA("TextButton") or c:IsA("Frame") then c:Destroy() end
+                end
+                for _,plr in pairs(Players:GetPlayers()) do
+                    local Item = Instance.new("TextButton", List)
+                    Item.Size = UDim2.new(1,0,0,36)
+                    Item.BackgroundColor3 = Color3.fromRGB(35,35,35)
+                    Item.Text = plr.Name
+                    Item.Font = Enum.Font.Gotham
+                    Item.TextSize = 13
+                    Item.TextColor3 = Color3.new(1,1,1)
+                    local thumb = Instance.new("ImageLabel", Item)
+                    thumb.Size = UDim2.new(0,32,0,32)
+                    thumb.Position = UDim2.new(0,2,0.5,-16)
+                    thumb.BackgroundTransparency = 1
+                    local content = Players:GetUserThumbnailAsync(plr.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size48x48)
+                    thumb.Image = content
+                    Item.MouseButton1Click:Connect(function()
+                        Drop.Text = txt.." : "..plr.Name
+                        List.Visible = false
+                        if callback then callback(plr.Name) end
+                    end)
+                end
+            end
+
+            refresh()
+            Players.PlayerAdded:Connect(refresh)
+            Players.PlayerRemoving:Connect(refresh)
+
+            Drop.MouseButton1Click:Connect(function()
+                List.Visible = not List.Visible
+            end)
+        end
+
+        return Window
+    end
+
+    return Panel
+end
+
+return Lib
