@@ -195,10 +195,13 @@ function Lib:CreatePanel(name)
         Holder.Visible = false
         Holder.ZIndex = 4
 
-        local holderLayout = Instance.new("UIListLayout", Holder)
-        holderLayout.FillDirection = Enum.FillDirection.Vertical
-        holderLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        holderLayout.Padding = UDim.new(0,8)
+-- Dentro del ButtonRow
+local GridLayout = Instance.new("UIGridLayout", ButtonRow)
+GridLayout.CellSize = UDim2.new(0,150,0,40) -- cada botón mide 150x40
+GridLayout.CellPadding = UDim2.new(0,12,0,12) -- separación entre botones
+GridLayout.FillDirection = Enum.FillDirection.Horizontal
+GridLayout.SortOrder = Enum.SortOrder.LayoutOrder
+GridLayout.StartCorner = Enum.StartCorner.TopLeft
 
         -- ButtonRow (vertical)
         local ButtonRow = Instance.new("Frame", Holder)
